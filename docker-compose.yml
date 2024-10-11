@@ -1,0 +1,30 @@
+version: '3'
+services:
+  api-gateway:
+    build:
+      context: ./ApiGateway
+    ports:
+      - "4000:4000"
+    depends_on:
+      - dolar-oficial-flask
+      - dolar-blue-fastapi
+
+  dolar-oficial-flask:
+    build:
+      context: ./DOficial
+    ports:
+      - "5001:5001"
+
+  dolar-blue-fastapi:
+    build:
+      context: ./DBlue
+    ports:
+      - "5002:5002"
+
+  client:
+    build:
+      context: ./client
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api-gateway
