@@ -3,7 +3,7 @@ import requests
 
 app = Flask(__name__)
 
-@app.route('/dolar/oficial', method=['GET'])
+@app.route('/dolar/oficial')
 def get_dolar_oficial():
     response = requests.get("https://dolarapi.com/v1/dolares/oficial")
     data = response.json()
@@ -14,3 +14,4 @@ def get_dolar_oficial():
     })
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001)  
+

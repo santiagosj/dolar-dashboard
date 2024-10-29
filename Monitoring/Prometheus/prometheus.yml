@@ -1,0 +1,10 @@
+scrape_configs:
+  - job_name: 'server-1'
+    static_configs:
+      - targets: ['server-1:5001']  
+  - job_name: 'server-2'
+    static_configs:
+      - targets: ['server-2:5002']
+  - job_name: 'server-3'
+    static_configs:
+      - targets: ['server-3:5003']

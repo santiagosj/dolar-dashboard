@@ -1,30 +1,152 @@
 version: '3'
 services:
+  # Load Balancer (NGINX)
+  load-balancer:
+    image: nginx:latest
+    container_name: load-balancer
+    ports:
+      - "80:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - dashboard_default
+    volumes:
+      - ./LoadBalancer/nginx.conf:/etc/nginx/nginx.conf
+
+  # API Gateway
   api-gateway:
     build:
       context: ./ApiGateway
     ports:
       - "4000:4000"
+    container_name: api-gateway
     depends_on:
       - dolar-oficial-flask
       - dolar-blue-fastapi
+    networks:
+      - dashboard_default
+    volumes:
+      - ./ApiGateway:/usr/src/app
 
-  dolar-oficial-flask:
-    build:
-      context: ./DOficial
-    ports:
-      - "5001:5001"
-
+  # Microservice: fastapi
   dolar-blue-fastapi:
     build:
-      context: ./DBlue
+      context: ./Server-1
+    ports:
+      - "5001:5001"
+    container_name: fastapi-server
+    networks:
+      - dashboard_default
+    volumes:
+      - ./Server-1:/usr/src/app
+
+  # Microservice: Flask
+  dolar-oficial-flask:
+    build:
+      context: ./Server-2
     ports:
       - "5002:5002"
+    container_name: flask-server
+    networks:
+      - dashboard_default
+    volumes:
+      - ./Server-2:/usr/src/app
+
+  # Microservice: Flask
+  dolar-mep-deno:
+    build:
+      context: ./Server-3
+    ports:
+      - "5003:5003"
+    container_name: deno-server
+    networks:
+      - dashboard_default
+    volumes:
+      - ./Server-3:/usr/src/app
 
   client:
     build:
       context: ./client
+      dockerfile: Dockerfile
+    container_name: client-dashboard
     ports:
       - "3000:3000"
+    command: "npm run dev"
+    networks:
+      - dashboard_default
+    volumes:
+      - ./client:/usr/src/app
+      - ./client/src:/usr/src/app/client/src
+      - ./client/vite.config.ts:/usr/src/app/client/vite.config.ts
     depends_on:
       - api-gateway
+
+    # Prometheus
+    prometheus:
+      image: prom/prometheus:latest
+      container_name: prometheus
+      ports:
+        - "9090:9090"
+      volumes:
+        - ./Monitoring/Prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      networks:
+        - dashboard_default
+    # Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - dashboard_default
+
+  # Elasticsearch
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    networks:
+      - dashboard_default
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+
+  # Logstash
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.10.1
+    container_name: logstash
+    volumes:
+      - ./Monitoring/ELK/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    networks:
+      - dashboard_default
+    depends_on:
+      - elasticsearch
+
+  # Kibana
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.10.1
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    networks:
+      - dashboard_default
+    depends_on:
+      - elasticsearch
+
+volumes:
+  grafana_data:
+  es_data:
+
+
+networks:
+  dashboard_default:
+    driver: bridge
