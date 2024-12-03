@@ -1,10 +1,9 @@
-FROM denoland/deno
+FROM denoland/deno:latest
 EXPOSE 8080
 WORKDIR /usr/src/app
 USER deno
-COPY deps.ts .
-RUN deno cache deps.ts
+COPY main.ts .
+RUN deno cache main.ts
 COPY . .
 RUN deno cache main.ts
-# RUN mkdir -p /var/tmp/log
-CMD ["run", "--allow-all", "main.ts"]
+CMD ["run", "--allow-net", "main.ts"]

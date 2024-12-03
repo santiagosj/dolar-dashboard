@@ -2,10 +2,10 @@ version: '3'
 services:
   # Load Balancer (NGINX)
   load-balancer:
-    image: nginx:latest
+    build: ./LoadBalancer
     container_name: load-balancer
     ports:
-      - "80:80"
+      - "8080:8080"
     depends_on:
       - api-gateway
     networks:
@@ -80,17 +80,16 @@ services:
       - ./client/vite.config.ts:/usr/src/app/client/vite.config.ts
     depends_on:
       - api-gateway
-
     # Prometheus
-    prometheus:
-      image: prom/prometheus:latest
-      container_name: prometheus
-      ports:
-        - "9090:9090"
-      volumes:
-        - ./Monitoring/Prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      networks:
-        - dashboard_default
+  prometheus:
+    build: ./Monitoring/Prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./Monitoring/Prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - dashboard_default
     # Grafana
   grafana:
     image: grafana/grafana:latest
@@ -106,7 +105,7 @@ services:
 
   # Elasticsearch
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.16.1
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
@@ -116,22 +115,22 @@ services:
     networks:
       - dashboard_default
     volumes:
-      - es_data:/usr/share/elasticsearch/data
+      - ./Monitoring/ELK/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
 
   # Logstash
   logstash:
-    image: docker.elastic.co/logstash/logstash:7.10.1
+    image: docker.elastic.co/logstash/logstash:7.14.0
     container_name: logstash
-    volumes:
-      - ./Monitoring/ELK/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
     networks:
       - dashboard_default
     depends_on:
       - elasticsearch
+    volumes:
+      - ./Monitoring/ELK/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
 
   # Kibana
   kibana:
-    image: docker.elastic.co/kibana/kibana:7.10.1
+    image: docker.elastic.co/kibana/kibana:8.16.1
     container_name: kibana
     ports:
       - "5601:5601"

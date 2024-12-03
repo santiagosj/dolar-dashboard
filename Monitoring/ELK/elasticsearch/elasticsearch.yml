@@ -1,0 +1,4 @@
+# ELK/elasticsearch/elasticsearch.yml
+network.host: 0.0.0.0
+discovery.type: single-node
+xpack.security.enabled: false  # Desactiva la seguridad para el desarrollo
