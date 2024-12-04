@@ -30,18 +30,18 @@ This project implements a network monitoring system using a microservices archit
 
 ## **Architecture**
 Dashboard/
-├── ApiGateway/           # API Gateway using Express/TypeScript
-├── Client/               # Frontend built with Vite + React
-├── Server-1/             # Service for Official Dollar (Flask)
-├── Server-2/             # Service for Blue Dollar (FastAPI)
-├── Server-3/             # Service for MEP Dollar (Deno)
-├── LoadBalancer/         # Load Balancer (NGINX)
-├── Monitoring/           # Monitoring and logging tools
-│   ├── Prometheus/
-│   ├── Grafana/
-│   └── ELK/
-├── docker-compose.yml    # Multi-service orchestration
-└── README.md             # Documentation
+├── ApiGateway/ # API Gateway using Express/TypeScript
+├── Client/ # Frontend built with Vite + React
+├── Server-1/ # Service for Official Dollar (Flask)
+├── Server-2/ # Service for Blue Dollar (FastAPI)
+├── Server-3/ # Service for MEP Dollar (Deno)
+├── LoadBalancer/ # Load Balancer (NGINX)
+├── Monitoring/ # Monitoring and logging tools
+│ ├── Prometheus/
+│ ├── Grafana/
+│ └── ELK/
+├── docker-compose.yml # Multi-service orchestration
+└── README.md # Documentation
 
 ## **Technologies Used**
 
@@ -63,7 +63,7 @@ Dashboard/
 
 
 ## **Secuence Diagram**
-
+```mermaid
 sequenceDiagram
 Client->>ApiGateway: Request data (Dollar rates)
 ApiGateway->>LoadBalancer: Distribute request
@@ -77,9 +77,9 @@ LoadBalancer-->>ApiGateway: Aggregated data
 ApiGateway-->>Client: Return response to client
 Client->>Grafana: View metrics (via Prometheus)
 Client->>Kibana: View logs (via ELK)
-
+```
 ## **Components**
-
+```mermaid
 graph TD
 A[Client] -->|Sends requests| B[ApiGateway]
 B -->|Routes to services| C[LoadBalancer]
@@ -89,3 +89,4 @@ C -->|Fetch data| F[DenoService]
 B -->|Logs requests| G[ELK Stack]
 C -->|Monitors services| H[Prometheus]
 H -->|Visualize metrics| I[Grafana]
+```
