@@ -13,7 +13,7 @@ COPY ./src ./src
 RUN npm install
 
 # Compila el código TypeScript a JavaScript
-RUN npx tsc
+RUN tsc
 
 # Exponer el puerto
 EXPOSE 4000
